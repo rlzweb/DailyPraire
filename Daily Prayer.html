@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Daily Prayer</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#16203a;--mute:#5d6786;--line:#d9deec;--blue:#26478f;--gold:#b8842a;--bead:#d9deec;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10152a;--card:#1a2140;--ink:#eef0f8;--mute:#9aa3c4;--line:#2c3560;--blue:#8fb0ff;--gold:#e0b25a;--bead:#2c3560}}
+:root[data-theme="dark"]{--bg:#10152a;--card:#1a2140;--ink:#eef0f8;--mute:#9aa3c4;--line:#2c3560;--blue:#8fb0ff;--gold:#e0b25a;--bead:#2c3560}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Figtree,system-ui,sans-serif}
+main{max-width:640px;margin:0 auto;padding:16px 16px 96px}
+h1,h2,h3{font-family:"Cormorant Garamond",Georgia,serif;margin:0;line-height:1.15}
+h1{font-size:32px}h2{font-size:26px;margin:20px 0 8px}h3{font-size:21px}
+.date{color:var(--mute);margin:2px 0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0}
+.card.gold{border-left:4px solid var(--gold)}
+.mute{color:var(--mute);font-size:14px}
+button,.btn{font:600 15px Figtree,sans-serif;border:0;border-radius:10px;padding:11px 16px;background:var(--blue);color:#fff;cursor:pointer;text-decoration:none;display:inline-block}
+:root:not([data-theme="light"]) .btn,:root:not([data-theme="light"]) button.pri{}
+@media (prefers-color-scheme:dark){button,.btn{color:#10152a}}
+button.alt{background:transparent;color:var(--blue);border:1px solid var(--line)}
+button:focus-visible,.btn:focus-visible,.chip:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 0 8px}
+.chip{flex:none;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:99px;padding:8px 14px}
+.chip.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+@media (prefers-color-scheme:dark){.chip.on{color:#10152a}}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;max-width:210px;background:none;color:var(--mute);border-radius:0;padding:14px 4px}
+nav button.on{color:var(--blue);box-shadow:inset 0 3px 0 var(--gold)}
+.prayer{font-family:"Cormorant Garamond",Georgia,serif;font-size:20px;line-height:1.5}
+.beads{display:flex;gap:7px;justify-content:center;margin:16px 0;flex-wrap:wrap}
+.bead{width:26px;height:26px;border-radius:50%;background:var(--bead);border:2px solid var(--line)}
+.bead.f{background:var(--gold);border-color:var(--gold)}
+.bar{height:6px;background:var(--bead);border-radius:9px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;background:var(--gold)}
+.days{display:flex;gap:5px;margin:8px 0}
+.days i{flex:1;height:8px;border-radius:4px;background:var(--bead)}
+.days i.d{background:var(--gold)}.days i.n{background:var(--blue)}
+ol{padding-left:20px;margin:6px 0}
+</style></head><body><main id="app"></main>
+<nav><button data-t="today">Today</button><button data-t="novenas">Novenas</button><button data-t="rosary">Rosary</button><button data-t="prayers">Chaplets</button></nav>
+<script>
+const OF="Our Father, who art in heaven, hallowed be thy name; thy kingdom come; thy will be done on earth as it is in heaven. Give us this day our daily bread; and forgive us our trespasses as we forgive those who trespass against us; and lead us not into temptation, but deliver us from evil. Amen.";
+const HM="Hail Mary, full of grace, the Lord is with thee. Blessed art thou amongst women, and blessed is the fruit of thy womb, Jesus. Holy Mary, Mother of God, pray for us sinners, now and at the hour of our death. Amen.";
+const GB="Glory be to the Father, and to the Son, and to the Holy Spirit, as it was in the beginning, is now, and ever shall be, world without end. Amen.";
+const FT="O my Jesus, forgive us our sins, save us from the fires of hell, lead all souls to heaven, especially those most in need of thy mercy.";
+const CREED="I believe in God, the Father almighty, Creator of heaven and earth, and in Jesus Christ, his only Son, our Lord, who was conceived by the Holy Spirit, born of the Virgin Mary, suffered under Pontius Pilate, was crucified, died and was buried; he descended into hell; on the third day he rose again from the dead; he ascended into heaven, and is seated at the right hand of God the Father almighty; from there he will come to judge the living and the dead. I believe in the Holy Spirit, the holy Catholic Church, the communion of saints, the forgiveness of sins, the resurrection of the body, and life everlasting. Amen.";
+const HHQ="Hail, holy Queen, Mother of mercy, our life, our sweetness and our hope. To thee do we cry, poor banished children of Eve; to thee do we send up our sighs, mourning and weeping in this valley of tears. Turn then, most gracious advocate, thine eyes of mercy toward us, and after this our exile, show unto us the blessed fruit of thy womb, Jesus. O clement, O loving, O sweet Virgin Mary. Pray for us, O holy Mother of God, that we may be made worthy of the promises of Christ. Amen.";
+const MYST={Joyful:["The Annunciation","The Visitation","The Nativity","The Presentation","Finding Jesus in the Temple"],
+Sorrowful:["The Agony in the Garden","The Scourging at the Pillar","The Crowning with Thorns","The Carrying of the Cross","The Crucifixion"],
+Glorious:["The Resurrection","The Ascension","The Descent of the Holy Spirit","The Assumption of Mary","The Coronation of Mary"],
+Luminous:["The Baptism of Jesus","The Wedding at Cana","The Proclamation of the Kingdom","The Transfiguration","The Institution of the Eucharist"]};
+const BYDAY=["Glorious","Joyful","Sorrowful","Glorious","Luminous","Sorrowful","Joyful"];
+
+const N=(id,name,tags,open,days)=>({id,name,tags,open,days});
+const NOVENAS=[
+N("jude","St. Jude",["Hopeless cases","Difficult times"],"St. Jude, faithful apostle and friend of Jesus, you are called the helper of the hopeless. Come to my aid in this great need. Pray for me that I may never lose hope.",
+["Name your need and place it in God's hands.","Ask for trust when nothing seems to change.","Pray for patience with God's timing.","Ask for courage to take the next small step.","Forgive anyone connected to this struggle.","Thank God for help you have already received.","Pray for others who feel hopeless.","Surrender the outcome to God's will.","Rest in hope. Offer thanks for what is coming."]),
+N("rita","St. Rita",["Hopeless cases","Marriage and family","Grief and suffering"],"St. Rita, patroness of impossible causes, you bore suffering with patience and forgave those who wronged you. Intercede for me in this trial.",
+["Bring your hardest situation to Jesus.","Ask for the grace of patience.","Pray for peace in your home.","Ask for a heart that forgives.","Pray for those who have hurt you.","Unite your suffering to the cross of Christ.","Pray for those who are widowed or grieving.","Ask for perseverance in prayer.","Trust that nothing is impossible with God."]),
+N("anthony","St. Anthony",["Lost things","Guidance"],"St. Anthony, gentle patron of the lost, help me find what I have lost, and above all keep me from losing God.",
+["Name what you have lost, big or small.","Ask for a calm mind to search well.","Pray to find lost peace.","Pray for those who have lost their faith.","Ask for the gift of attentiveness.","Pray for the lost and the lonely.","Thank God for what you still have.","Ask to be a finder of others in need.","Give thanks for the way God finds you."]),
+N("joseph","St. Joseph",["Work and finances","Marriage and family","Guidance"],"St. Joseph, just and faithful guardian of the Holy Family, protect my home and work and teach me to trust God quietly.",
+["Pray for your family under his protection.","Pray for steady, honest work.","Ask for help with money worries.","Pray for fathers and those who lead families.","Ask for the gift of a quiet, prayerful life.","Pray for those who are unemployed.","Ask for purity of heart.","Pray for a holy death for yourself and loved ones.","Entrust everything to his care."]),
+N("spirit","Holy Spirit",["Guidance","Discernment","Difficult times"],"Come, Holy Spirit, fill the hearts of your faithful and kindle in them the fire of your love. Guide my decisions.",
+["Ask for the gift of wisdom.","Ask for understanding of God's will.","Ask for good counsel in a decision.","Ask for fortitude to do what is right.","Ask for knowledge of God's truth.","Ask for a heart of true devotion.","Ask for holy fear of the Lord.","Ask for love, joy and peace.","Offer yourself to be led wherever he calls."]),
+N("surrender","Surrender Novena",["Anxiety and peace","Difficult times","Hopeless cases"],"O Jesus, I surrender myself to you. Take care of everything.",
+["Surrender your finances and work.","Surrender your family and relationships.","Surrender your health.","Surrender your plans for the future.","Surrender your regrets and the past.","Surrender your fears.","Surrender those you love most.","Surrender your will.","Rest. He is taking care of everything."]),
+N("therese","St. Th\u00e9r\u00e8se",["Guidance","Anxiety and peace","Small daily love"],"St. Th\u00e9r\u00e8se, little flower, teach me your Little Way of trusting love in small things. Send me a rose as a sign of your help.",
+["Ask for childlike trust in God.","Offer the small tasks of your day with love.","Ask for patience with difficult people.","Ask for humility.","Pray for priests and missionaries.","Ask to accept your weakness.","Ask for the courage to love without reward.","Pray for those far from God.","Ask to spend your heaven doing good on earth."]),
+N("souls","Prayers for the Dead",["Grief and suffering","The deceased"],"Eternal rest grant unto them, O Lord, and let perpetual light shine upon them. May they rest in peace.",
+["Pray for a loved one who has died.","Pray for your parents and grandparents.","Pray for friends who have died.","Pray for those who died suddenly.","Pray for the forgotten souls in purgatory.","Pray for those who died alone.","Pray for the souls closest to heaven.","Pray for those who still need mercy most.","Give thanks for their lives, and ask them to pray for you."]),
+N("guadalupe","Our Lady of Guadalupe",["Marriage and family","Difficult times","Guidance"],"Holy Mary, Mother of God and our Mother, you appeared to St. Juan Diego with tenderness. Cover me with your mantle and bring my needs to your Son.",
+["Place your needs in her care.","Pray for your mother and all mothers.","Pray for the unborn and their mothers.","Pray for the sick.","Pray for your family.","Pray for the Church in the Americas.","Pray for the poor and the immigrant.","Pray for peace in the world.","Ask her to lead you closer to Jesus."])
+];
+const TAGS=[...new Set(NOVENAS.flatMap(n=>n.tags))];
+
+let S={tab:"today",tag:"All",ro:{i:0,c:0,set:null}};
+let store={};
+try{store=JSON.parse(localStorage.getItem("prayerapp")||"{}")}catch(e){}
+store.active=store.active||{};
+const save=()=>{try{localStorage.setItem("prayerapp",JSON.stringify(store))}catch(e){}};
+const $=s=>document.querySelector(s),app=$("#app");
+const dkey=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const dayN=k=>{const a=new Date(k+"T00:00:00"),t=new Date();t.setHours(0,0,0,0);return Math.round((t-a)/864e5)+1};
+const now=new Date();
+const usccb=()=>"https://bible.usccb.org/bible/readings/"+String(now.getMonth()+1).padStart(2,"0")+String(now.getDate()).padStart(2,"0")+String(now.getFullYear()).slice(2)+".cfm";
+const dateStr=now.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
+const todaySet=()=>BYDAY[now.getDay()];
+
+function novenaCard(n,full){
+ const k=store.active[n.id],d=k?dayN(k):0;
+ if(!k)return `<div class="card"><h3>${n.name}</h3><div class="mute">${n.tags.join(" \u00b7 ")}</div><div class="row"><button data-start="${n.id}">Start today</button></div></div>`;
+ if(d<1||d>9)return `<div class="card gold"><h3>${n.name}</h3><p>${d>9?"Novena complete. Thanks be to God.":"Starts tomorrow."}</p><div class="row"><button class="alt" data-end="${n.id}">${d>9?"Finish":"Cancel"}</button>${d>9?`<button data-start="${n.id}">Pray again</button>`:""}</div></div>`;
+ const dots=Array.from({length:9},(_,i)=>`<i class="${i+1<d?"d":i+1==d?"n":""}"></i>`).join("");
+ return `<div class="card gold"><h3>${n.name} \u2014 Day ${d} of 9</h3><div class="days">${dots}</div>
+ <p class="mute">Intention for today: ${n.days[d-1]}</p>
+ <details ${full?"open":""}><summary><b>Today's prayers</b></summary>
+ <p class="prayer">${n.open}</p>
+ <p class="mute">Then pray your personal petition, followed by:</p>
+ <ol class="mute"><li>Our Father</li><li>Hail Mary</li><li>Glory Be</li></ol>
+ <p class="prayer"><em>${n.name}, pray for us.</em></p></details>
+ <div class="row"><button class="alt" data-end="${n.id}">Stop novena</button></div></div>`;
+}
+function today(){
+ const act=NOVENAS.filter(n=>store.active[n.id]);
+ const set=todaySet();
+ return `<h1>Daily Prayer</h1><p class="date">${dateStr}</p>
+ <div class="card"><h3>Mass readings</h3><p class="mute">Today's first reading, psalm, and Gospel from the USCCB.</p><a class="btn" href="${usccb()}" target="_blank" rel="noopener">Open today's readings</a></div>
+ <div class="card"><h3>Rosary: ${set} Mysteries</h3><p class="mute">${MYST[set].join(", ")}</p><div class="row"><button data-go="rosary">Pray the Rosary</button></div></div>
+ <h2>My novenas</h2>${act.length?act.map(n=>novenaCard(n,true)).join(""):`<div class="card"><p class="mute">No active novena. Pick one by intention and it will show up here each day.</p><button data-go="novenas">Choose a novena</button></div>`}`;
+}
+function novenas(){
+ const list=NOVENAS.filter(n=>S.tag==="All"||n.tags.includes(S.tag));
+ return `<h1>Novenas</h1><p class="date">Choose by intention</p>
+ <div class="chips">${["All",...TAGS].map(t=>`<button class="chip ${t===S.tag?"on":""}" data-tag="${t}">${t}</button>`).join("")}</div>
+ ${list.map(n=>novenaCard(n,false)).join("")}`;
+}
+function steps(set){
+ const s=[{t:"Sign of the Cross",x:"In the name of the Father, and of the Son, and of the Holy Spirit. Amen."},
+ {t:"Apostles' Creed",x:CREED},{t:"Our Father",x:OF},{t:"Three Hail Marys",x:HM,c:3,sub:"For faith, hope, and charity"},{t:"Glory Be",x:GB}];
+ MYST[set].forEach((m,i)=>{
+  s.push({t:`${["First","Second","Third","Fourth","Fifth"][i]} Mystery`,x:`<b>${m}</b><br><br>${OF}`,sub:"Announce the mystery, then pray the Our Father"});
+  s.push({t:"Ten Hail Marys",x:HM,c:10,sub:m});
+  s.push({t:"Glory Be and Fatima Prayer",x:GB+"<br><br>"+FT});
+ });
+ s.push({t:"Hail, Holy Queen",x:HHQ},{t:"Closing",x:"Pray for us, O holy Mother of God, that we may be made worthy of the promises of Christ. Amen.<br><br>Sign of the Cross."});
+ return s;
+}
+function rosary(){
+ const set=S.ro.set||todaySet();
+ const st=steps(set),r=S.ro,cur=st[r.i];
+ const beads=cur.c?`<div class="beads">${Array.from({length:cur.c},(_,i)=>`<button class="bead ${i<r.c?"f":""}" data-bead="${i}" aria-label="Hail Mary ${i+1}"></button>`).join("")}</div><p class="mute" style="text-align:center">${r.c} of ${cur.c}</p>`:"";
+ return `<h1>Rosary</h1>
+ <div class="chips">${Object.keys(MYST).map(m=>`<button class="chip ${m===set?"on":""}" data-set="${m}">${m}${m===todaySet()?" (today)":""}</button>`).join("")}</div>
+ <div class="bar"><i style="width:${Math.round(r.i/(st.length-1)*100)}%"></i></div>
+ <div class="card gold"><h3>${cur.t}</h3>${cur.sub?`<p class="mute">${cur.sub}</p>`:""}<p class="prayer">${cur.x}</p>${beads}
+ <div class="row"><button class="alt" data-prev ${r.i==0?"disabled":""}>Back</button><button data-next>${r.i==st.length-1?"Finish":"Next"}</button></div></div>
+ <p class="mute">Step ${r.i+1} of ${st.length}</p>`;
+}
+const AV="Hail Mary, full of grace, the Lord is with thee. Blessed art thou amongst women, and blessed is the fruit of thy womb, Jesus. Holy Mary, Mother of God, pray for us sinners, now and at the hour of our death. Amen.";
+const PRAY={
+angelus:{name:"The Angelus",note:"Traditionally prayed at 6 am, noon, and 6 pm. In Eastertide, the Regina Caeli replaces it.",steps:[
+{t:"The Annunciation",x:"V. The Angel of the Lord declared unto Mary.<br>R. And she conceived of the Holy Spirit.<br><br>"+AV},
+{t:"Mary's yes",x:"V. Behold the handmaid of the Lord.<br>R. Be it done unto me according to thy word.<br><br>"+AV},
+{t:"The Incarnation",x:"V. And the Word was made flesh.<br>R. And dwelt among us.<br><br>"+AV},
+{t:"Closing prayer",x:"V. Pray for us, O holy Mother of God.<br>R. That we may be made worthy of the promises of Christ.<br><br>Let us pray. Pour forth, we beseech thee, O Lord, thy grace into our hearts; that we, to whom the incarnation of Christ thy Son was made known by the message of an angel, may by his passion and cross be brought to the glory of his resurrection. Through the same Christ our Lord. Amen."}]},
+mercy:{name:"Divine Mercy Chaplet",note:"Prayed on a rosary. Especially fitting at 3 pm, the hour of mercy, and during the Divine Mercy Novena.",steps:(function(){
+const a=[{t:"Sign of the Cross",x:"In the name of the Father, and of the Son, and of the Holy Spirit. Amen."},
+{t:"Opening prayers",x:"Our Father, Hail Mary, and the Apostles' Creed.<br><br>Optional: You expired, Jesus, but the source of life gushed forth for souls, and the ocean of mercy opened up for the whole world. O Fount of Life, unfathomable Divine Mercy, envelop the whole world and empty yourself out upon us. O Blood and Water, which gushed forth from the Heart of Jesus as a fount of mercy for us, I trust in you."}];
+for(let i=1;i<=5;i++){
+a.push({t:"Large bead, decade "+i,x:"Eternal Father, I offer you the Body and Blood, Soul and Divinity of your dearly beloved Son, our Lord Jesus Christ, in atonement for our sins and those of the whole world."});
+a.push({t:"Ten small beads, decade "+i,x:"For the sake of his sorrowful Passion, have mercy on us and on the whole world.",c:10});}
+a.push({t:"Holy God",x:"Holy God, Holy Mighty One, Holy Immortal One, have mercy on us and on the whole world.",c:3,sub:"Pray three times"});
+a.push({t:"Closing",x:"Jesus, I trust in you. Sign of the Cross."});return a;})()}};
+let PR={id:null,i:0,c:0};
+function prayers(){
+ if(!PR.id)return `<h1>Chaplets</h1><p class="date">Guided prayers</p>`+Object.keys(PRAY).map(k=>`<div class="card"><h3>${PRAY[k].name}</h3><p class="mute">${PRAY[k].note}</p><div class="row"><button data-popen="${k}">Begin</button></div></div>`).join("");
+ const P=PRAY[PR.id],st=P.steps,cur=st[PR.i];
+ const beads=cur.c?`<div class="beads">${Array.from({length:cur.c},(_,i)=>`<button class="bead ${i<PR.c?"f":""}" data-pbead="${i}" aria-label="Bead ${i+1}"></button>`).join("")}</div><p class="mute" style="text-align:center">${PR.c} of ${cur.c}</p>`:"";
+ return `<h1>${P.name}</h1><div class="bar"><i style="width:${st.length>1?Math.round(PR.i/(st.length-1)*100):100}%"></i></div>
+ <div class="card gold"><h3>${cur.t}</h3>${cur.sub?`<p class="mute">${cur.sub}</p>`:""}<p class="prayer">${cur.x}</p>${beads}
+ <div class="row"><button class="alt" data-pprev>Back</button><button data-pnext>${PR.i==st.length-1?"Finish":"Next"}</button></div></div>
+ <p class="mute">Step ${PR.i+1} of ${st.length} \u00b7 <a href="#" data-pexit style="color:var(--blue)">Leave</a></p>`;
+}
+function render(){
+ app.innerHTML=S.tab==="today"?today():S.tab==="novenas"?novenas():S.tab==="prayers"?prayers():rosary();
+ document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.t===S.tab));
+ window.scrollTo(0,0);
+}
+document.addEventListener("click",e=>{
+ const b=e.target.closest("button,[data-pexit]");if(!b)return;if(b.dataset.pexit!==undefined)e.preventDefault();const d=b.dataset;let keep=false;
+ if(d.t){S.tab=d.t}
+ else if(d.go){S.tab=d.go}
+ else if(d.tag){S.tag=d.tag}
+ else if(d.start){store.active[d.start]=dkey(new Date());save();S.tab="today"}
+ else if(d.end!==undefined){delete store.active[d.end];save()}
+ else if(d.set){S.ro={i:0,c:0,set:d.set}}
+ else if("next" in d){const st=steps(S.ro.set||todaySet());if(S.ro.i<st.length-1){S.ro.i++;S.ro.c=0}else{S.ro={i:0,c:0,set:S.ro.set};S.tab="today"}}
+ else if("prev" in d){if(S.ro.i>0){S.ro.i--;S.ro.c=0}}
+ else if(d.bead!==undefined){const i=+d.bead;S.ro.c=(S.ro.c===i+1)?i:i+1;keep=true}
+ else if(d.popen){PR={id:d.popen,i:0,c:0}}
+ else if("pnext" in d){const n=PRAY[PR.id].steps.length;if(PR.i<n-1){PR.i++;PR.c=0}else{PR={id:null,i:0,c:0}}}
+ else if("pprev" in d){if(PR.i>0){PR.i--;PR.c=0}}
+ else if(d.pbead!==undefined){const i=+d.pbead;PR.c=(PR.c===i+1)?i:i+1;keep=true}
+ else if("pexit" in d){PR={id:null,i:0,c:0}}
+ else return;
+ const y=window.scrollY;render();if(keep)window.scrollTo(0,y);
+});
+render();
+</script></body></html>
