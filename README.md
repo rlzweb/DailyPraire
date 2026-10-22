@@ -1,0 +1,1 @@
+A small, phone-friendly Catholic prayer companion that runs as a single web page. It brings together the day's Mass readings, a guided Rosary, nine novenas you can track day by day, and two guided chaplets
